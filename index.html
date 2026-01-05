@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prueba CORS</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; line-height: 1.35; }
+    label { display:block; margin: 10px 0 6px; font-weight: 600; }
+    input, select, button, textarea { width: 100%; padding: 10px; font-size: 14px; }
+    button { margin-top: 12px; cursor: pointer; }
+    pre { background: #f6f8fa; padding: 12px; overflow:auto; }
+    .row { display:flex; gap: 12px; }
+    .row > div { flex: 1; }
+    small { color: #444; }
+  </style>
+</head>
+<body>
+  <h1>Prueba CORS (desde otro origen)</h1>
+
+  <label>URL objetivo (tu API o endpoint)</label>
+  <input id="url" placeholder="https://tu-dominio.com/api/me" />
+
+  <div class="row">
+    <div>
+      <label>Método</label>
+      <select id="method">
+        <option>GET</option>
+        <option>POST</option>
+        <option>PUT</option>
+        <option>DELETE</option>
+      </select>
+    </div>
+    <div>
+      <label>Credenciales (cookies)</label>
+      <select id="creds">
+        <option value="omit">omit (no enviar cookies)</option>
+        <option value="include">include (enviar cookies)</option>
+      </select>
+      <small>Si tu sesión va por cookies, usa <b>include</b>.</small>
+    </div>
+  </div>
+
+  <label>Body (JSON opcional)</label>
+  <textarea id="body" rows="5" placeholder='{"ejemplo": true}'></textarea>
+
+  <label>Forzar preflight (header personalizado)</label>
+  <input id="xhdr" placeholder="X-Test: 1 (dejar vacío si no lo necesitas)" />
+
+  <button id="go">Ejecutar</button>
+
+  <h2>Resultado</h2>
+  <pre id="out">Listo.</pre>
+
+  <script>
+    const out = (msg) => (document.getElementById("out").textContent = msg);
+
+    document.getElementById("go").addEventListener("click", async () => {
+      const url = document.getElementById("url").value.trim();
+      const method = document.getElementById("method").value;
+      const credentials = document.getElementById("creds").value;
+      const bodyRaw = document.getElementById("body").value.trim();
+      const xhdrRaw = document.getElementById("xhdr").value.trim();
+
+      if (!url) return out("Falta la URL objetivo.");
+
+      const headers = {};
+      let body;
+
+      // Si hay body, asumimos JSON y eso puede disparar preflight (según el caso)
+      if (bodyRaw) {
+        headers["Content-Type"] = "application/json";
+        body = bodyRaw;
+      }
+
+      // Header personalizado para forzar preflight (si lo pones)
+      if (xhdrRaw) {
+        const idx = xhdrRaw.indexOf(":");
+        if (idx > 0) {
+          const k = xhdrRaw.slice(0, idx).trim();
+          const v = xhdrRaw.slice(idx + 1).trim();
+          headers[k] = v;
+        } else {
+          return out('Formato inválido. Usa "X-Test: 1".');
+        }
+      }
+
+      out("Enviando solicitud...\n(Abre DevTools > Console/Network para ver detalles CORS)");
+
+      try {
+        const resp = await fetch(url, {
+          method,
+          mode: "cors",
+          credentials,
+          headers,
+          body: (method === "GET" || method === "HEAD") ? undefined : body
+        });
+
+        // Ojo: si CORS está mal y el navegador bloquea lectura,
+        // normalmente fetch rechazará con TypeError y caerá al catch.
+        const text = await resp.text();
+
+        // Algunas cabeceras no son accesibles por CORS (dependen de Access-Control-Expose-Headers)
+        const acao = resp.headers.get("access-control-allow-origin");
+        const acc = resp.headers.get("access-control-allow-credentials");
+
+        out(
+          `HTTP ${resp.status} ${resp.statusText}\n` +
+          `Access-Control-Allow-Origin (visible): ${acao}\n` +
+          `Access-Control-Allow-Credentials (visible): ${acc}\n\n` +
+          `--- Body ---\n${text}`
+        );
+      } catch (e) {
+        out(
+          "Fallo al leer la respuesta desde el navegador.\n" +
+          "Esto suele indicar bloqueo por CORS (o un error de red).\n\n" +
+          `Error: ${e}`
+        );
+      }
+    });
+  </script>
+</body>
+</html>
