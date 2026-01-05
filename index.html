@@ -2,122 +2,1163 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Prueba CORS</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Herramienta Profesional de Validación CORS</title>
   <style>
-    body { font-family: system-ui, Arial, sans-serif; margin: 24px; line-height: 1.35; }
-    label { display:block; margin: 10px 0 6px; font-weight: 600; }
-    input, select, button, textarea { width: 100%; padding: 10px; font-size: 14px; }
-    button { margin-top: 12px; cursor: pointer; }
-    pre { background: #f6f8fa; padding: 12px; overflow:auto; }
-    .row { display:flex; gap: 12px; }
-    .row > div { flex: 1; }
-    small { color: #444; }
+    :root { --bg:#0b1220; --card:#111a2e; --muted:#9fb0d0; --txt:#e8efff; --line:#243151; --bad:#ff6b6b; --ok:#6bff9b; --warn:#ffd36b; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--bg); color: var(--txt); }
+    a { color: #bcd0ff; }
+    header { padding: 18px 18px 10px; border-bottom: 1px solid var(--line); position: sticky; top:0; background: rgba(11,18,32,0.92); backdrop-filter: blur(10px); z-index: 2;}
+    header h1 { margin: 0; font-size: 18px; letter-spacing: .2px; }
+    header .sub { margin-top: 6px; color: var(--muted); font-size: 13px; }
+    main { padding: 18px; max-width: 1200px; margin: 0 auto; }
+    .grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 14px; }
+    @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    .card h2 { margin: 0 0 10px; font-size: 14px; color: #d8e6ff; }
+    label { display:block; font-size: 12px; color: var(--muted); margin: 10px 0 6px; }
+    input, select, textarea, button { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: #0e1730; color: var(--txt); outline: none; }
+    textarea { min-height: 92px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12.5px; line-height: 1.35; }
+    input::placeholder, textarea::placeholder { color: #7f91b6; }
+    .row { display:flex; gap: 10px; }
+    .row > * { flex: 1; }
+    .btnrow { display:flex; gap: 10px; flex-wrap: wrap; }
+    .btn { width: auto; padding: 10px 12px; cursor:pointer; user-select:none; }
+    .btn.primary { background: #15326b; border-color: #274a99; }
+    .btn.good { background: #0f3a26; border-color: #1e7d4f; }
+    .btn.warn { background: #3a2a0f; border-color: #7d5a1e; }
+    .btn.bad { background: #3a0f0f; border-color: #7d1e1e; }
+    .btn:disabled { opacity:.55; cursor:not-allowed; }
+    .pill { display:inline-block; padding: 4px 10px; border-radius: 999px; border:1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .pills { display:flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .kv { display:grid; grid-template-columns: 220px 1fr; gap: 8px; font-size: 12.5px; margin-top: 8px; }
+    .kv div { padding: 8px 10px; background: #0e1730; border:1px solid var(--line); border-radius: 10px; }
+    .kv .k { color: #bcd0ff; }
+    .kv .v { color: #e8efff; overflow-wrap:anywhere; }
+    .statusline { display:flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--muted); display:inline-block; }
+    .dot.ok { background: var(--ok); }
+    .dot.bad { background: var(--bad); }
+    .dot.warn { background: var(--warn); }
+    .small { font-size: 12px; color: var(--muted); }
+    details summary { cursor: pointer; color: #d8e6ff; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 12px 0; }
+    .twocol { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 980px) { .twocol { grid-template-columns: 1fr; } }
+    .danger-note { color: #ffd0d0; font-size: 12px; }
+    .ok-note { color: #caffdd; font-size: 12px; }
   </style>
 </head>
 <body>
-  <h1>Prueba CORS (desde otro origen)</h1>
-
-  <label>URL objetivo (tu API o endpoint)</label>
-  <input id="url" placeholder="https://tu-dominio.com/api/me" />
-
-  <div class="row">
-    <div>
-      <label>Método</label>
-      <select id="method">
-        <option>GET</option>
-        <option>POST</option>
-        <option>PUT</option>
-        <option>DELETE</option>
-      </select>
-    </div>
-    <div>
-      <label>Credenciales (cookies)</label>
-      <select id="creds">
-        <option value="omit">omit (no enviar cookies)</option>
-        <option value="include">include (enviar cookies)</option>
-      </select>
-      <small>Si tu sesión va por cookies, usa <b>include</b>.</small>
-    </div>
+<header>
+  <h1>Herramienta Profesional de Validación CORS (desde otro origen)</h1>
+  <div class="sub">
+    Ejecuta solicitudes desde este origen y evalúa CORS, preflight, credenciales, formatos de cuerpo y trazas para auditoría.
+    <span class="pill mono" id="originPill"></span>
   </div>
+</header>
 
-  <label>Body (JSON opcional)</label>
-  <textarea id="body" rows="5" placeholder='{"ejemplo": true}'></textarea>
+<main>
+  <div class="grid">
+    <!-- CONFIG -->
+    <section class="card">
+      <h2>Configuración de la solicitud</h2>
 
-  <label>Forzar preflight (header personalizado)</label>
-  <input id="xhdr" placeholder="X-Test: 1 (dejar vacío si no lo necesitas)" />
+      <label>URL objetivo (API o endpoint)</label>
+      <input id="url" placeholder="https://tu-dominio.com/wp-json/wp/v2/posts?per_page=1" />
 
-  <button id="go">Ejecutar</button>
+      <div class="row">
+        <div>
+          <label>Método</label>
+          <select id="method">
+            <option>GET</option>
+            <option>POST</option>
+            <option>PUT</option>
+            <option>PATCH</option>
+            <option>DELETE</option>
+            <option>OPTIONS</option>
+            <option>HEAD</option>
+          </select>
+        </div>
+        <div>
+          <label>Modo</label>
+          <select id="mode">
+            <option value="cors">cors</option>
+            <option value="no-cors">no-cors (lectura limitada)</option>
+            <option value="same-origin">same-origin</option>
+          </select>
+        </div>
+      </div>
 
-  <h2>Resultado</h2>
-  <pre id="out">Listo.</pre>
+      <div class="row">
+        <div>
+          <label>Credenciales (cookies)</label>
+          <select id="creds">
+            <option value="omit">omit (no enviar cookies)</option>
+            <option value="same-origin">same-origin</option>
+            <option value="include">include (enviar cookies)</option>
+          </select>
+          <div class="small">Para sesiones por cookies, el caso crítico suele ser <b>include</b> + endpoints sensibles.</div>
+        </div>
+        <div>
+          <label>Redirect</label>
+          <select id="redirect">
+            <option value="follow">follow</option>
+            <option value="manual">manual (diagnóstico)</option>
+            <option value="error">error</option>
+          </select>
+          <div class="small">En cross-origin, <b>manual</b> puede devolver respuestas “opaqueredirect”.</div>
+        </div>
+      </div>
 
-  <script>
-    const out = (msg) => (document.getElementById("out").textContent = msg);
+      <hr />
 
-    document.getElementById("go").addEventListener("click", async () => {
-      const url = document.getElementById("url").value.trim();
-      const method = document.getElementById("method").value;
-      const credentials = document.getElementById("creds").value;
-      const bodyRaw = document.getElementById("body").value.trim();
-      const xhdrRaw = document.getElementById("xhdr").value.trim();
+      <div class="twocol">
+        <div>
+          <label>Headers (uno por línea: <span class="mono">Nombre: valor</span>)</label>
+          <textarea id="headers" placeholder="Authorization: Bearer ...&#10;X-WP-Nonce: ...&#10;X-Test: 1"></textarea>
 
-      if (!url) return out("Falta la URL objetivo.");
+          <div class="row">
+            <div>
+              <label>Forzar preflight (atajo)</label>
+              <input id="forcePreflight" placeholder='X-Test: 1 (opcional)' />
+              <div class="small">Si lo rellenas, se añadirá a headers (a menos que ya exista).</div>
+            </div>
+            <div>
+              <label>Timeout (ms)</label>
+              <input id="timeout" type="number" min="0" step="100" placeholder="15000" value="15000" />
+              <div class="small">0 desactiva timeout.</div>
+            </div>
+          </div>
+        </div>
 
-      const headers = {};
-      let body;
+        <div>
+          <label>Tipo de cuerpo (Body)</label>
+          <select id="bodyType">
+            <option value="none">none</option>
+            <option value="json">JSON (application/json)</option>
+            <option value="form">x-www-form-urlencoded</option>
+            <option value="text">Texto (text/plain)</option>
+            <option value="multipart">multipart/form-data (FormData)</option>
+          </select>
 
-      // Si hay body, asumimos JSON y eso puede disparar preflight (según el caso)
-      if (bodyRaw) {
-        headers["Content-Type"] = "application/json";
-        body = bodyRaw;
+          <label id="bodyLabel">Body</label>
+          <textarea id="body" placeholder='{"ejemplo":true}'></textarea>
+          <div class="small">
+            <span class="mono">form</span> y <span class="mono">multipart</span>: líneas <span class="mono">clave=valor</span>. JSON: texto JSON.
+          </div>
+
+          <label>Privacidad / Persistencia</label>
+          <div class="row">
+            <button class="btn warn" id="togglePersist">Persistencia: ON</button>
+            <button class="btn bad" id="clearAll">Limpiar</button>
+          </div>
+          <div class="small danger-note">
+            Si ejecutarás pruebas con respuestas sensibles, considere desactivar persistencia y ocultar body.
+          </div>
+        </div>
+      </div>
+
+      <hr />
+
+      <div class="btnrow">
+        <button class="btn primary" id="run">Ejecutar</button>
+        <button class="btn" id="predict">Predecir preflight</button>
+        <button class="btn good" id="runSuite">Ejecutar suite</button>
+        <button class="btn" id="exportLast">Exportar último resultado (JSON)</button>
+        <label class="btn" style="display:flex;align-items:center;gap:10px;">
+          Importar perfil
+          <input type="file" id="importProfile" accept="application/json" style="display:none;">
+        </label>
+      </div>
+
+      <div class="pills" id="hints"></div>
+
+      <hr />
+
+      <h2>Perfiles (guardar/cargar)</h2>
+      <div class="row">
+        <input id="profileName" placeholder="Nombre del perfil (p.ej., WP search-accuracy)" />
+        <button class="btn good" id="saveProfile">Guardar</button>
+      </div>
+      <div class="row">
+        <select id="profiles"></select>
+        <button class="btn" id="loadProfile">Cargar</button>
+        <button class="btn bad" id="deleteProfile">Eliminar</button>
+        <button class="btn" id="exportProfiles">Exportar perfiles</button>
+      </div>
+      <div class="small">Los perfiles se guardan en <span class="mono">localStorage</span> si la persistencia está activada.</div>
+    </section>
+
+    <!-- RESULTS -->
+    <section class="card">
+      <h2>Resultado y diagnóstico</h2>
+
+      <div class="statusline">
+        <span class="dot" id="dot"></span>
+        <span class="pill mono" id="statusPill">Sin ejecutar</span>
+        <span class="pill mono" id="timePill">—</span>
+        <span class="pill mono" id="typePill">—</span>
+        <span class="pill mono" id="finalUrlPill">—</span>
+      </div>
+
+      <div class="pills" id="riskPills"></div>
+
+      <details open>
+        <summary>Resumen</summary>
+        <div id="summary" class="small" style="margin-top:10px;">Listo.</div>
+      </details>
+
+      <hr />
+
+      <details open>
+        <summary>Request (captura)</summary>
+        <div class="kv" id="reqKv"></div>
+      </details>
+
+      <hr />
+
+      <details open>
+        <summary>Response (cabeceras accesibles + body)</summary>
+        <div class="small" style="margin-top:10px;">
+          Nota: el navegador sólo expone a JavaScript ciertas cabeceras; para ver todas, use DevTools → Network.
+        </div>
+        <div class="kv" id="resKv"></div>
+
+        <label style="margin-top:12px;">Body (vista)</label>
+        <div class="row">
+          <button class="btn" id="toggleBody">Body: visible</button>
+          <button class="btn" id="copyBody">Copiar body</button>
+        </div>
+        <textarea id="bodyOut" readonly></textarea>
+      </details>
+
+      <hr />
+
+      <details>
+        <summary>Log / Suite</summary>
+        <textarea id="log" readonly style="min-height:180px;"></textarea>
+      </details>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- Helpers ----------
+  const $ = (id) => document.getElementById(id);
+  const nowISO = () => new Date().toISOString();
+
+  function setPill(el, text) { el.textContent = text; }
+  function addPill(container, text, tone = "neutral") {
+    const s = document.createElement("span");
+    s.className = "pill mono";
+    s.textContent = text;
+    if (tone === "ok") s.style.borderColor = "#1e7d4f";
+    if (tone === "bad") s.style.borderColor = "#7d1e1e";
+    if (tone === "warn") s.style.borderColor = "#7d5a1e";
+    container.appendChild(s);
+  }
+  function clearChildren(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+  function safeJsonParse(s) {
+    try { return { ok: true, value: JSON.parse(s) }; }
+    catch (e) { return { ok: false, error: String(e) }; }
+  }
+
+  function parseKeyValueLines(text) {
+    // For form-urlencoded or multipart: lines "k=v"
+    const lines = (text || "").split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const kv = [];
+    for (const line of lines) {
+      const idx = line.indexOf("=");
+      if (idx < 1) continue;
+      const k = line.slice(0, idx).trim();
+      const v = line.slice(idx + 1).trim();
+      kv.push([k, v]);
+    }
+    return kv;
+  }
+
+  function parseHeadersLines(text) {
+    // lines "Name: value"
+    const headers = new Headers();
+    const raw = [];
+    const lines = (text || "").split(/\r?\n/);
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      const idx = line.indexOf(":");
+      if (idx < 1) {
+        raw.push({ line, ok: false, error: "Formato inválido (use Nombre: valor)" });
+        continue;
       }
-
-      // Header personalizado para forzar preflight (si lo pones)
-      if (xhdrRaw) {
-        const idx = xhdrRaw.indexOf(":");
-        if (idx > 0) {
-          const k = xhdrRaw.slice(0, idx).trim();
-          const v = xhdrRaw.slice(idx + 1).trim();
-          headers[k] = v;
-        } else {
-          return out('Formato inválido. Usa "X-Test: 1".');
-        }
-      }
-
-      out("Enviando solicitud...\n(Abre DevTools > Console/Network para ver detalles CORS)");
-
+      const k = line.slice(0, idx).trim();
+      const v = line.slice(idx + 1).trim();
       try {
-        const resp = await fetch(url, {
-          method,
-          mode: "cors",
-          credentials,
-          headers,
-          body: (method === "GET" || method === "HEAD") ? undefined : body
-        });
-
-        // Ojo: si CORS está mal y el navegador bloquea lectura,
-        // normalmente fetch rechazará con TypeError y caerá al catch.
-        const text = await resp.text();
-
-        // Algunas cabeceras no son accesibles por CORS (dependen de Access-Control-Expose-Headers)
-        const acao = resp.headers.get("access-control-allow-origin");
-        const acc = resp.headers.get("access-control-allow-credentials");
-
-        out(
-          `HTTP ${resp.status} ${resp.statusText}\n` +
-          `Access-Control-Allow-Origin (visible): ${acao}\n` +
-          `Access-Control-Allow-Credentials (visible): ${acc}\n\n` +
-          `--- Body ---\n${text}`
-        );
+        headers.append(k, v);
+        raw.push({ k, v, ok: true });
       } catch (e) {
-        out(
-          "Fallo al leer la respuesta desde el navegador.\n" +
-          "Esto suele indicar bloqueo por CORS (o un error de red).\n\n" +
-          `Error: ${e}`
-        );
+        raw.push({ k, v, ok: false, error: String(e) });
       }
+    }
+    return { headers, raw };
+  }
+
+  function looksLikeCorsBlock(err) {
+    const s = String(err || "");
+    // Browsers often give TypeError: Failed to fetch for CORS; the real message is in console.
+    return /Failed to fetch|NetworkError|Load failed|fetch/i.test(s);
+  }
+
+  function isSimpleHeader(name, value) {
+    const n = String(name || "").toLowerCase();
+    if (["accept", "accept-language", "content-language"].includes(n)) return true;
+    if (n === "content-type") {
+      const v = String(value || "").toLowerCase().split(";")[0].trim();
+      return ["application/x-www-form-urlencoded", "multipart/form-data", "text/plain"].includes(v);
+    }
+    return false;
+  }
+
+  function predictPreflight({ method, headers, bodyType }) {
+    const m = String(method || "GET").toUpperCase();
+    if (!["GET", "HEAD", "POST"].includes(m)) return { will: true, reasons: [`Método ${m} no es simple`] };
+
+    // Determine content-type that will be sent by our tool
+    let contentType = null;
+    if (bodyType === "json") contentType = "application/json";
+    else if (bodyType === "form") contentType = "application/x-www-form-urlencoded";
+    else if (bodyType === "text") contentType = "text/plain";
+    else if (bodyType === "multipart") contentType = "multipart/form-data"; // fetch sets boundary automatically; still non-simple if custom? it's considered simple but boundary complicates; treat as will preflight if custom headers exist.
+    // Note: if we use FormData, the browser sets a multipart/form-data with boundary; it is generally considered non-simple in practice when boundary is included,
+    // and many setups trigger preflight when combined with other non-simple factors. We'll be conservative.
+
+    const reasons = [];
+    // Check headers
+    for (const [k, v] of headers.entries()) {
+      if (!isSimpleHeader(k, v)) reasons.push(`Header no simple: ${k}`);
+    }
+    // Content-Type if set explicitly in headers (we set it in some modes)
+    if (contentType && contentType !== "application/x-www-form-urlencoded" && contentType !== "text/plain") {
+      // application/json definitely causes preflight when used as Content-Type header
+      reasons.push(`Content-Type no simple: ${contentType}`);
+    }
+    if (bodyType === "multipart") reasons.push("multipart/form-data (con boundary) suele provocar preflight en muchas configuraciones");
+
+    return { will: reasons.length > 0, reasons: reasons.length ? reasons : ["Solicitud simple (sin preflight esperado)"] };
+  }
+
+  function stringifyHeadersReadable(headers) {
+    const out = {};
+    for (const [k, v] of headers.entries()) out[k] = v;
+    return out;
+  }
+
+  function kvRender(container, obj) {
+    clearChildren(container);
+    for (const [k, v] of Object.entries(obj)) {
+      const kdiv = document.createElement("div");
+      kdiv.className = "k mono";
+      kdiv.textContent = k;
+      const vdiv = document.createElement("div");
+      vdiv.className = "v mono";
+      vdiv.textContent = (v === undefined || v === null) ? String(v) : String(v);
+      container.appendChild(kdiv);
+      container.appendChild(vdiv);
+    }
+  }
+
+  function downloadJson(filename, data) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // ---------- Persistence ----------
+  const STORAGE_KEY = "cors_tester_profiles_v1";
+  let persistOn = true;
+  let lastResult = null;
+  let bodyVisible = true;
+
+  function getProfiles() {
+    if (!persistOn) return {};
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    try { return JSON.parse(raw) || {}; } catch { return {}; }
+  }
+  function setProfiles(p) {
+    if (!persistOn) return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  }
+  function refreshProfilesSelect() {
+    const sel = $("profiles");
+    clearChildren(sel);
+    const profiles = getProfiles();
+    const names = Object.keys(profiles).sort((a,b) => a.localeCompare(b));
+    if (names.length === 0) {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "(sin perfiles guardados)";
+      sel.appendChild(opt);
+      sel.disabled = true;
+      return;
+    }
+    sel.disabled = false;
+    for (const name of names) {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      sel.appendChild(opt);
+    }
+  }
+
+  function readFormState() {
+    return {
+      url: $("url").value.trim(),
+      method: $("method").value,
+      mode: $("mode").value,
+      creds: $("creds").value,
+      redirect: $("redirect").value,
+      headers: $("headers").value,
+      forcePreflight: $("forcePreflight").value.trim(),
+      timeout: Number($("timeout").value || 0),
+      bodyType: $("bodyType").value,
+      body: $("body").value
+    };
+  }
+
+  function applyFormState(s) {
+    $("url").value = s.url || "";
+    $("method").value = s.method || "GET";
+    $("mode").value = s.mode || "cors";
+    $("creds").value = s.creds || "omit";
+    $("redirect").value = s.redirect || "follow";
+    $("headers").value = s.headers || "";
+    $("forcePreflight").value = s.forcePreflight || "";
+    $("timeout").value = (s.timeout ?? 15000);
+    $("bodyType").value = s.bodyType || "none";
+    $("body").value = s.body || "";
+    updateBodyUI();
+    updateHints();
+  }
+
+  function clearForm() {
+    applyFormState({
+      url: "",
+      method: "GET",
+      mode: "cors",
+      creds: "omit",
+      redirect: "follow",
+      headers: "",
+      forcePreflight: "",
+      timeout: 15000,
+      bodyType: "none",
+      body: ""
     });
-  </script>
+  }
+
+  // ---------- UI updates ----------
+  function updateBodyUI() {
+    const t = $("bodyType").value;
+    const label = $("bodyLabel");
+    const body = $("body");
+    if (t === "none") {
+      label.textContent = "Body (deshabilitado)";
+      body.disabled = true;
+      body.value = "";
+      body.placeholder = "";
+    } else if (t === "json") {
+      label.textContent = "Body (JSON)";
+      body.disabled = false;
+      body.placeholder = '{"q":"test"}';
+    } else if (t === "form") {
+      label.textContent = "Body (x-www-form-urlencoded)";
+      body.disabled = false;
+      body.placeholder = "q=test\npage=1";
+    } else if (t === "text") {
+      label.textContent = "Body (texto)";
+      body.disabled = false;
+      body.placeholder = "texto...";
+    } else if (t === "multipart") {
+      label.textContent = "Body (multipart/FormData)";
+      body.disabled = false;
+      body.placeholder = "q=test\npage=1\nfile=@(no soportado aquí)"; // simple tool: no files
+    }
+    updateHints();
+  }
+
+  function updateHints() {
+    const hints = $("hints");
+    clearChildren(hints);
+
+    const state = readFormState();
+    const origin = location.origin;
+    addPill(hints, `Origen: ${origin}`, "ok");
+
+    if (!state.url) {
+      addPill(hints, "Defina URL objetivo", "warn");
+      return;
+    }
+
+    let targetOrigin = "";
+    try { targetOrigin = new URL(state.url).origin; } catch { targetOrigin = "(URL inválida)"; }
+    addPill(hints, `Destino: ${targetOrigin}`, "neutral");
+
+    const { headers } = parseHeadersLines(state.headers);
+    // force preflight shortcut
+    if (state.forcePreflight) {
+      const idx = state.forcePreflight.indexOf(":");
+      if (idx > 0) addPill(hints, `Atajo preflight: ${state.forcePreflight}`, "warn");
+      else addPill(hints, "Atajo preflight inválido (use Nombre: valor)", "bad");
+    }
+
+    const pred = predictPreflight({ method: state.method, headers, bodyType: state.bodyType });
+    if (pred.will) addPill(hints, "Preflight probable: SÍ", "warn");
+    else addPill(hints, "Preflight probable: NO", "ok");
+
+    if (state.creds === "include") addPill(hints, "Credenciales: include (alto impacto)", "warn");
+    if (state.mode === "no-cors") addPill(hints, "no-cors: lectura limitada", "warn");
+    if (state.redirect === "manual") addPill(hints, "redirect=manual: puede ser opaqueredirect", "warn");
+  }
+
+  function setStatus({ ok, statusText, ms, type, finalUrl, tone }) {
+    const dot = $("dot");
+    dot.className = "dot " + (tone || (ok ? "ok" : "bad"));
+    setPill($("statusPill"), statusText);
+    setPill($("timePill"), ms != null ? `${ms.toFixed(1)} ms` : "—");
+    setPill($("typePill"), type || "—");
+    setPill($("finalUrlPill"), finalUrl ? `URL final: ${finalUrl}` : "—");
+  }
+
+  function setRiskPills(info) {
+    const rp = $("riskPills");
+    clearChildren(rp);
+    if (!info) return;
+
+    if (info.corsAllowed === true) addPill(rp, "CORS permite lectura", "ok");
+    if (info.corsAllowed === false) addPill(rp, "CORS bloquea lectura (o red)", "bad");
+    if (info.preflightLikely) addPill(rp, "Preflight probable", "warn");
+    if (info.allowCredentialsTrue) addPill(rp, "Allow-Credentials: true", "warn");
+
+    if (info.allowCredentialsTrue && info.acao && info.acao !== "null") {
+      addPill(rp, `ACAO: ${info.acao}`, "neutral");
+    }
+    if (info.allowCredentialsTrue && info.acao === "*") {
+      addPill(rp, "Riesgo: ACAO=* con credenciales (configuración inválida)", "bad");
+    }
+    if (info.allowCredentialsTrue && info.acao && info.acao.includes("github.io")) {
+      addPill(rp, "Revise: origen permitido externo", "warn");
+    }
+  }
+
+  function setSummary(text, tone) {
+    const el = $("summary");
+    el.textContent = text;
+    el.style.color = tone === "bad" ? "var(--bad)" : tone === "warn" ? "var(--warn)" : "var(--muted)";
+  }
+
+  function setBodyOut(text) {
+    $("bodyOut").value = bodyVisible ? (text ?? "") : "[oculto]";
+  }
+
+  // ---------- Core request ----------
+  async function runOnce(customState = null, suiteLabel = null) {
+    const state = customState || readFormState();
+    updateHints();
+
+    const startedAt = performance.now();
+    const origin = location.origin;
+
+    // Build headers
+    const parsed = parseHeadersLines(state.headers);
+    const headers = parsed.headers;
+
+    // Apply preflight shortcut header if provided and not already present
+    if (state.forcePreflight) {
+      const idx = state.forcePreflight.indexOf(":");
+      if (idx > 0) {
+        const k = state.forcePreflight.slice(0, idx).trim();
+        const v = state.forcePreflight.slice(idx + 1).trim();
+        if (k && !headers.has(k)) headers.set(k, v);
+      }
+    }
+
+    // Build body
+    let body = undefined;
+    let bodyNote = "";
+    const method = String(state.method || "GET").toUpperCase();
+    const hasBody = !["GET", "HEAD"].includes(method) && state.bodyType !== "none";
+
+    if (hasBody) {
+      if (state.bodyType === "json") {
+        // Validate JSON early (optional but helpful)
+        const chk = safeJsonParse(state.body);
+        if (!chk.ok) {
+          setStatus({ ok: false, statusText: "Body JSON inválido", ms: performance.now() - startedAt, type: "—", finalUrl: "", tone: "bad" });
+          setSummary(`JSON inválido: ${chk.error}`, "bad");
+          return {
+            ok: false,
+            error: `JSON inválido: ${chk.error}`,
+            at: nowISO(),
+            request: { ...state, origin },
+            suiteLabel
+          };
+        }
+        headers.set("Content-Type", "application/json; charset=UTF-8");
+        body = JSON.stringify(chk.value);
+        bodyNote = "Body JSON";
+      } else if (state.bodyType === "form") {
+        headers.set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        const kv = parseKeyValueLines(state.body);
+        const usp = new URLSearchParams();
+        for (const [k, v] of kv) usp.append(k, v);
+        body = usp.toString();
+        bodyNote = "Body x-www-form-urlencoded";
+      } else if (state.bodyType === "text") {
+        headers.set("Content-Type", "text/plain; charset=UTF-8");
+        body = state.body ?? "";
+        bodyNote = "Body texto";
+      } else if (state.bodyType === "multipart") {
+        // Simple FormData builder (no files in this static tool)
+        const kv = parseKeyValueLines(state.body);
+        const fd = new FormData();
+        for (const [k, v] of kv) fd.append(k, v);
+        body = fd;
+        // DO NOT set Content-Type manually for FormData; browser adds boundary.
+        bodyNote = "Body FormData (multipart)";
+      }
+    }
+
+    // Timeout
+    const timeoutMs = Number(state.timeout || 0);
+    const ctrl = new AbortController();
+    let timeoutHandle = null;
+    if (timeoutMs > 0) {
+      timeoutHandle = setTimeout(() => ctrl.abort(new Error(`Timeout tras ${timeoutMs} ms`)), timeoutMs);
+    }
+
+    // Preflight prediction (diagnostic)
+    const pred = predictPreflight({ method, headers, bodyType: state.bodyType });
+
+    // Prepare request capture
+    const reqCapture = {
+      at: nowISO(),
+      suiteLabel: suiteLabel || "",
+      fromOrigin: origin,
+      url: state.url,
+      method,
+      mode: state.mode,
+      credentials: state.creds,
+      redirect: state.redirect,
+      timeoutMs,
+      preflightPredicted: pred,
+      headers: (() => {
+        const o = {};
+        for (const [k, v] of headers.entries()) o[k] = v;
+        return o;
+      })(),
+      bodyType: state.bodyType,
+      bodyPreview: (() => {
+        if (state.bodyType === "none") return "";
+        if (state.bodyType === "multipart") return "(FormData: claves en el textarea; archivos no soportados en esta versión)";
+        // do not auto-leak too much; keep first 2k
+        const s = String(state.body || "");
+        return s.length > 2000 ? s.slice(0, 2000) + "…(truncado)" : s;
+      })()
+    };
+
+    // Render request capture in UI (only when not running suite or when it is the last item)
+    if (!suiteLabel) {
+      kvRender($("reqKv"), {
+        "URL": reqCapture.url,
+        "Method": reqCapture.method,
+        "Mode": reqCapture.mode,
+        "Credentials": reqCapture.credentials,
+        "Redirect": reqCapture.redirect,
+        "Timeout": reqCapture.timeoutMs,
+        "Preflight (predicción)": reqCapture.preflightPredicted.will ? "Sí" : "No",
+        "Razones": reqCapture.preflightPredicted.reasons.join(" | "),
+        "Headers": JSON.stringify(reqCapture.headers, null, 2),
+        "BodyType": reqCapture.bodyType,
+        "BodyPreview": reqCapture.bodyPreview
+      });
+    }
+
+    try {
+      setStatus({ ok: false, statusText: "Enviando…", ms: null, type: "—", finalUrl: "", tone: "warn" });
+      setSummary("Ejecutando solicitud. Revise DevTools → Network para ver preflight (OPTIONS) y cabeceras completas.", "warn");
+
+      const resp = await fetch(state.url, {
+        method,
+        mode: state.mode,
+        credentials: state.creds,
+        redirect: state.redirect,
+        headers,
+        body: hasBody ? body : undefined,
+        signal: ctrl.signal
+      });
+
+      const endedAt = performance.now();
+      const ms = endedAt - startedAt;
+
+      const resHeadersReadable = stringifyHeadersReadable(resp.headers);
+      const acao = resp.headers.get("access-control-allow-origin");
+      const acc = resp.headers.get("access-control-allow-credentials");
+      const acam = resp.headers.get("access-control-allow-methods");
+      const acah = resp.headers.get("access-control-allow-headers");
+      const vary = resp.headers.get("vary");
+
+      // Read body (best-effort)
+      let text = "";
+      try {
+        text = await resp.text();
+      } catch (e) {
+        text = `[No fue posible leer el body: ${String(e)}]`;
+      }
+
+      const type = resp.type || "—";
+      const finalUrl = resp.url || "";
+
+      // Risk / interpretation
+      const allowCredentialsTrue = (String(acc || "").toLowerCase() === "true");
+      const corsAllowed = true; // If we could read status and body, JS is reading something (except some opaque/no-cors cases)
+      const info = {
+        corsAllowed,
+        preflightLikely: pred.will,
+        allowCredentialsTrue,
+        acao,
+        acc,
+        acam,
+        acah,
+        vary,
+        type
+      };
+      setRiskPills(info);
+
+      // Status pill
+      const statusText = `HTTP ${resp.status} ${resp.statusText || ""}`.trim();
+      setStatus({ ok: resp.ok, statusText, ms, type, finalUrl, tone: resp.ok ? "ok" : "warn" });
+
+      // Summary interpretation
+      let summary = "";
+      let tone = "neutral";
+
+      if (state.mode === "no-cors") {
+        summary = "Se ejecutó en modo no-cors: la lectura de respuesta/cabeceras estará limitada por diseño.";
+        tone = "warn";
+      } else if (type === "opaque") {
+        summary = "Respuesta opaque: normalmente indica limitaciones de CORS/no-cors. Verifique en Network.";
+        tone = "warn";
+      } else if (type === "opaqueredirect") {
+        summary = "Respuesta opaqueredirect: redirección en modo manual con restricciones cross-origin. Cambie redirect=follow para observar URL final.";
+        tone = "warn";
+      } else {
+        summary = "El navegador permitió leer la respuesta. Valide si el origen permitido es el esperado y, si hay credenciales, si esto es estrictamente necesario.";
+        tone = (allowCredentialsTrue ? "warn" : "neutral");
+      }
+
+      setSummary(summary, tone);
+
+      // Render response capture
+      if (!suiteLabel) {
+        kvRender($("resKv"), {
+          "Status": statusText,
+          "OK": resp.ok,
+          "Type": type,
+          "Redirected": resp.redirected,
+          "URL final (resp.url)": finalUrl,
+          "ACAO (legible desde JS)": acao,
+          "ACC (legible desde JS)": acc,
+          "ACAM (legible desde JS)": acam,
+          "ACAH (legible desde JS)": acah,
+          "Vary (legible desde JS)": vary,
+          "Headers (legibles desde JS)": JSON.stringify(resHeadersReadable, null, 2),
+          "Nota": bodyNote || "—"
+        });
+        setBodyOut(text);
+      }
+
+      const result = {
+        ok: resp.ok,
+        at: nowISO(),
+        request: reqCapture,
+        response: {
+          status: resp.status,
+          statusText: resp.statusText,
+          ok: resp.ok,
+          type,
+          redirected: resp.redirected,
+          url: finalUrl,
+          headersReadable: resHeadersReadable,
+          cors: { acao, acc, acam, acah, vary },
+          body: text
+        },
+        diagnostics: {
+          elapsedMs: ms,
+          interpretation: summary,
+          riskFlags: {
+            allowCredentialsTrue,
+            allowOriginStarWithCredentials: allowCredentialsTrue && acao === "*"
+          }
+        }
+      };
+
+      lastResult = result;
+      logLine(`[${nowISO()}] ${suiteLabel ? `[Suite: ${suiteLabel}] ` : ""}${statusText} | ${ms.toFixed(1)}ms | type=${type}`);
+      return result;
+
+    } catch (e) {
+      const endedAt = performance.now();
+      const ms = endedAt - startedAt;
+
+      if (timeoutHandle) clearTimeout(timeoutHandle);
+
+      const errStr = String(e && e.message ? e.message : e);
+      const corsSuspected = looksLikeCorsBlock(errStr);
+
+      setStatus({ ok: false, statusText: "Error en fetch()", ms, type: "—", finalUrl: "", tone: "bad" });
+      setRiskPills({ corsAllowed: false, preflightLikely: pred.will, allowCredentialsTrue: false, acao: null });
+      setSummary(
+        corsSuspected
+          ? "Fallo al leer la respuesta desde el navegador. Usualmente indica bloqueo por CORS o error de red. Confirme el mensaje exacto en Console y revise el preflight (OPTIONS) en Network."
+          : `Error: ${errStr}`,
+        "bad"
+      );
+
+      if (!suiteLabel) {
+        kvRender($("resKv"), { "Error": errStr, "CORS sospechado": corsSuspected, "Nota": "Revise DevTools → Console/Network para el motivo exacto." });
+        setBodyOut("");
+      }
+
+      const result = {
+        ok: false,
+        at: nowISO(),
+        request: { ...reqCapture },
+        error: errStr,
+        diagnostics: {
+          elapsedMs: ms,
+          corsSuspected,
+          preflightPredicted: pred
+        }
+      };
+
+      lastResult = result;
+      logLine(`[${nowISO()}] ${suiteLabel ? `[Suite: ${suiteLabel}] ` : ""}ERROR | ${ms.toFixed(1)}ms | ${errStr}`);
+      return result;
+
+    } finally {
+      if (timeoutHandle) clearTimeout(timeoutHandle);
+    }
+  }
+
+  // ---------- Suite ----------
+  function defaultSuiteFromState(base) {
+    // A suite that covers "simple" vs "preflight" vs "credentials" & body formats
+    const s = base;
+    const url = s.url;
+    const hdrBase = (s.headers || "").trim();
+
+    const suite = [
+      {
+        label: "GET simple (omit, sin headers extra)",
+        state: { ...s, method: "GET", creds: "omit", bodyType: "none", body: "", headers: "" }
+      },
+      {
+        label: "GET con preflight (header no-simple)",
+        state: { ...s, method: "GET", creds: "omit", bodyType: "none", body: "", headers: "X-Test: 1" }
+      },
+      {
+        label: "POST JSON (omit)",
+        state: { ...s, method: "POST", creds: "omit", bodyType: "json", body: '{"q":"test"}', headers: hdrBase }
+      },
+      {
+        label: "POST form-urlencoded (omit)",
+        state: { ...s, method: "POST", creds: "omit", bodyType: "form", body: "q=test", headers: hdrBase }
+      },
+      {
+        label: "POST con credenciales (include) + preflight",
+        state: { ...s, method: "POST", creds: "include", bodyType: "form", body: "q=test", headers: "X-Test: 1" }
+      }
+    ];
+
+    // If URL seems WordPress REST endpoint and method likely POST-only, adjust first item
+    if (/\/wp-json\//i.test(url)) {
+      suite[0] = { label: "POST simple (omit, sin headers extra)", state: { ...s, method: "POST", creds: "omit", bodyType: "none", body: "", headers: "" } };
+    }
+
+    return suite;
+  }
+
+  async function runSuite() {
+    const base = readFormState();
+    if (!base.url) {
+      setSummary("Defina una URL antes de ejecutar la suite.", "warn");
+      return;
+    }
+    $("run").disabled = true;
+    $("runSuite").disabled = true;
+
+    logLine("=== Suite iniciada ===");
+    const suite = defaultSuiteFromState(base);
+    const results = [];
+    for (const item of suite) {
+      logLine(`→ Ejecutando: ${item.label}`);
+      // Do not overwrite the visible request/response panes during suite; only log.
+      const r = await runOnce(item.state, item.label);
+      results.push(r);
+    }
+    logLine("=== Suite finalizada ===");
+
+    // Summarize suite
+    const okCount = results.filter(r => r && r.ok).length;
+    const failCount = results.length - okCount;
+    setSummary(`Suite completada: ${okCount} exitosas, ${failCount} con fallo. Abra “Log / Suite” para detalle y exporte resultados si lo necesita.`, failCount ? "warn" : "neutral");
+
+    // Store suite as lastResult too (exportable)
+    lastResult = {
+      ok: failCount === 0,
+      at: nowISO(),
+      kind: "suite",
+      baseRequest: base,
+      results
+    };
+
+    $("run").disabled = false;
+    $("runSuite").disabled = false;
+  }
+
+  // ---------- Logging ----------
+  function logLine(s) {
+    const el = $("log");
+    el.value += (el.value ? "\n" : "") + s;
+    el.scrollTop = el.scrollHeight;
+  }
+
+  // ---------- Profiles ----------
+  function saveProfile() {
+    const name = $("profileName").value.trim();
+    if (!name) {
+      setSummary("Defina un nombre de perfil para guardar.", "warn");
+      return;
+    }
+    const profiles = getProfiles();
+    profiles[name] = readFormState();
+    setProfiles(profiles);
+    refreshProfilesSelect();
+    setSummary(`Perfil guardado: ${name}`, "neutral");
+  }
+
+  function loadProfile() {
+    const sel = $("profiles");
+    if (sel.disabled || !sel.value) return;
+    const profiles = getProfiles();
+    const p = profiles[sel.value];
+    if (!p) return;
+    applyFormState(p);
+    $("profileName").value = sel.value;
+    setSummary(`Perfil cargado: ${sel.value}`, "neutral");
+  }
+
+  function deleteProfile() {
+    const sel = $("profiles");
+    if (sel.disabled || !sel.value) return;
+    const profiles = getProfiles();
+    delete profiles[sel.value];
+    setProfiles(profiles);
+    refreshProfilesSelect();
+    setSummary("Perfil eliminado.", "neutral");
+  }
+
+  function exportProfiles() {
+    const profiles = getProfiles();
+    downloadJson(`cors-profiles-${new Date().toISOString().slice(0,10)}.json`, {
+      kind: "profiles",
+      at: nowISO(),
+      origin: location.origin,
+      profiles
+    });
+  }
+
+  async function importProfileFile(file) {
+    const text = await file.text();
+    const parsed = safeJsonParse(text);
+    if (!parsed.ok) {
+      setSummary(`JSON inválido: ${parsed.error}`, "bad");
+      return;
+    }
+    const obj = parsed.value;
+
+    // Accept either a single profile or profiles bundle
+    if (obj && obj.kind === "profiles" && obj.profiles && typeof obj.profiles === "object") {
+      if (!persistOn) {
+        setSummary("Persistencia está desactivada; active persistencia para importar perfiles.", "warn");
+        return;
+      }
+      const current = getProfiles();
+      for (const [k, v] of Object.entries(obj.profiles)) current[k] = v;
+      setProfiles(current);
+      refreshProfilesSelect();
+      setSummary("Perfiles importados.", "neutral");
+      return;
+    }
+
+    // Single profile
+    if (obj && obj.url && obj.method) {
+      applyFormState(obj);
+      setSummary("Perfil importado y aplicado.", "neutral");
+      return;
+    }
+
+    setSummary("Archivo JSON no reconocido (se esperaba un perfil o un paquete de perfiles).", "warn");
+  }
+
+  // ---------- Actions ----------
+  async function runMain() {
+    const st = readFormState();
+    if (!st.url) {
+      setSummary("Defina una URL objetivo.", "warn");
+      return;
+    }
+    $("run").disabled = true;
+    await runOnce();
+    $("run").disabled = false;
+  }
+
+  function doPredict() {
+    const st = readFormState();
+    const parsed = parseHeadersLines(st.headers);
+    const pred = predictPreflight({ method: st.method, headers: parsed.headers, bodyType: st.bodyType });
+    const msg = pred.will
+      ? `Preflight probable: SÍ\n- ${pred.reasons.join("\n- ")}`
+      : `Preflight probable: NO\n- ${pred.reasons.join("\n- ")}`;
+    setSummary(msg, pred.will ? "warn" : "neutral");
+    updateHints();
+  }
+
+  function togglePersist() {
+    persistOn = !persistOn;
+    $("togglePersist").textContent = `Persistencia: ${persistOn ? "ON" : "OFF"}`;
+    $("togglePersist").className = "btn " + (persistOn ? "warn" : "bad");
+    if (!persistOn) {
+      // Do not delete existing localStorage; simply stop using it.
+      setSummary("Persistencia desactivada: no se guardarán perfiles ni configuraciones en este navegador.", "warn");
+      $("profiles").disabled = true;
+      clearChildren($("profiles"));
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "(persistencia OFF)";
+      $("profiles").appendChild(opt);
+    } else {
+      refreshProfilesSelect();
+      setSummary("Persistencia activada: los perfiles se guardarán en este navegador (localStorage).", "neutral");
+    }
+  }
+
+  function clearAll() {
+    clearForm();
+    $("profileName").value = "";
+    $("log").value = "";
+    lastResult = null;
+    setStatus({ ok: false, statusText: "Sin ejecutar", ms: null, type: "—", finalUrl: "", tone: "neutral" });
+    clearChildren($("riskPills"));
+    kvRender($("reqKv"), {});
+    kvRender($("resKv"), {});
+    setBodyOut("");
+    setSummary("Limpio.", "neutral");
+    updateHints();
+  }
+
+  function toggleBodyView() {
+    bodyVisible = !bodyVisible;
+    $("toggleBody").textContent = `Body: ${bodyVisible ? "visible" : "oculto"}`;
+    // Re-apply current body
+    const current = $("bodyOut").value;
+    if (!bodyVisible) $("bodyOut").value = "[oculto]";
+    else if (lastResult && lastResult.response && typeof lastResult.response.body === "string") $("bodyOut").value = lastResult.response.body;
+    else $("bodyOut").value = "";
+  }
+
+  async function copyBody() {
+    const text = bodyVisible ? $("bodyOut").value : "";
+    if (!text) {
+      setSummary("No hay body visible para copiar.", "warn");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setSummary("Body copiado al portapapeles.", "neutral");
+    } catch (e) {
+      setSummary(`No fue posible copiar: ${String(e)}`, "warn");
+    }
+  }
+
+  function exportLastResult() {
+    if (!lastResult) {
+      setSummary("No hay resultado para exportar.", "warn");
+      return;
+    }
+    downloadJson(`cors-result-${new Date().toISOString().replace(/[:.]/g,"-")}.json`, lastResult);
+  }
+
+  // ---------- Wiring ----------
+  function init() {
+    $("originPill").textContent = location.origin;
+
+    // Default sensible state
+    clearForm();
+
+    // UI events
+    $("bodyType").addEventListener("change", updateBodyUI);
+    $("method").addEventListener("change", updateHints);
+    $("creds").addEventListener("change", updateHints);
+    $("mode").addEventListener("change", updateHints);
+    $("redirect").addEventListener("change", updateHints);
+    $("headers").addEventListener("input", updateHints);
+    $("forcePreflight").addEventListener("input", updateHints);
+    $("url").addEventListener("input", updateHints);
+
+    $("run").addEventListener("click", runMain);
+    $("predict").addEventListener("click", doPredict);
+    $("runSuite").addEventListener("click", runSuite);
+    $("togglePersist").addEventListener("click", togglePersist);
+    $("clearAll").addEventListener("click", clearAll);
+    $("toggleBody").addEventListener("click", toggleBodyView);
+    $("copyBody").addEventListener("click", copyBody);
+    $("exportLast").addEventListener("click", exportLastResult);
+
+    $("saveProfile").addEventListener("click", saveProfile);
+    $("loadProfile").addEventListener("click", loadProfile);
+    $("deleteProfile").addEventListener("click", deleteProfile);
+    $("exportProfiles").addEventListener("click", exportProfiles);
+
+    $("importProfile").addEventListener("change", async (ev) => {
+      const file = ev.target.files && ev.target.files[0];
+      if (!file) return;
+      await importProfileFile(file);
+      ev.target.value = "";
+    });
+
+    refreshProfilesSelect();
+    updateBodyUI();
+    updateHints();
+
+    // Initial status
+    setStatus({ ok: false, statusText: "Sin ejecutar", ms: null, type: "—", finalUrl: "", tone: "neutral" });
+  }
+
+  init();
+})();
+</script>
 </body>
 </html>
